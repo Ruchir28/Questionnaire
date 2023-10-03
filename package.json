@@ -1,0 +1,22 @@
+{
+  "name": "questionnaire",
+  "version": "1.0.0",
+  "description": "Real Time Questinnaire",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"cd frontend && npm start\" \"cd backend && npm start\"",
+    "install": "cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start:backend": "cd backend && npm start",
+    "build": "npm run build:frontend && npm run build:backend",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^6.5.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
