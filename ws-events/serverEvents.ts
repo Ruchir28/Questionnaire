@@ -1,8 +1,8 @@
 import { z } from 'zod';
-
+import WebSocket from 'ws';
 // Enums for Message Types, Round Types, and Round Status
 export enum MessageType {
-  StartNewRound = 'startNewRound',
+  CreateQuestionaireRound = 'createQuestionaireRound',
   EndCurrentRound = 'endCurrentRound',
   CreateSpace = 'createSpace',
   JoinSpace = 'joinSpace',
@@ -41,39 +41,40 @@ export const Space = z.object({
 });
 
 // Zod Schemas for Message Payloads
-const StartNewRoundPayload = z.object({
-  roundType: z.literal(RoundType.Normal).or(z.literal(RoundType.Incremental))
+const CreateQuestionaireRoundPayLoad = z.object({
+  spaceId: z.string()
 });
 
-const EndCurrentRoundPayload = z.object({});
-
-const CreateSpacePayload = z.object({
-  host: User
+const EndCurrentRoundPayload = z.object({
+  spaceId: z.string()
 });
+
+const CreateSpacePayload = z.object({});
 
 const JoinSpacePayload = z.object({
-  user: User
+  user: User,
+  spaceId: z.string()
 });
 
 const PostQuestionPayload = z.object({
-  text: z.string()
+  text: z.string(),
+  spaceId: z.string(),
+  userId: z.string()
 });
 
 const UpvoteQuestionPayload = z.object({
-  questionId: z.string()
+  questionId: z.string(),
+  spaceId: z.string()
 });
 
 const MessagePayloads = {
-  [MessageType.StartNewRound]: StartNewRoundPayload,
+  [MessageType.CreateQuestionaireRound]: CreateQuestionaireRoundPayLoad,
   [MessageType.EndCurrentRound]: EndCurrentRoundPayload,
   [MessageType.CreateSpace]: CreateSpacePayload,
   [MessageType.JoinSpace]: JoinSpacePayload,
   [MessageType.PostQuestion]: PostQuestionPayload,
   [MessageType.UpvoteQuestion]: UpvoteQuestionPayload
 };
-
-
-
 
 // Utility function for emitting events with enforced payload types using Zod
 export function emitEvent<T extends MessageType>(
@@ -84,6 +85,7 @@ export function emitEvent<T extends MessageType>(
   // Validate payload using Zod
   const validationResult = MessagePayloads[type].safeParse(payload);
   
+  
   if (!validationResult.success) {
     console.error('Invalid payload:', validationResult.error);
     return;
@@ -92,32 +94,41 @@ export function emitEvent<T extends MessageType>(
   // Send the message
   ws.send(JSON.stringify({
     type,
-    payload // Sending the payload as a nested object
+    payload
   }));
 }
 
 
-export function handleEvent<T extends MessageType>(
-  ws: WebSocket,
-  type: T,
-  handler: (payload: z.infer<typeof MessagePayloads[T]>) => void
-): void {
+export function createHandlerManager(ws: WebSocket) {
+  const handlers: { [key in MessageType]?: (payload: any, error: z.ZodError | null) => void } = {};
+
   ws.addEventListener('message', (event) => {
-    const message = JSON.parse(event.data);
-
-    // Check if the message type matches the type we're looking for
-    if (message.type === type) {
-      // Validate the payload using Zod
-      const validationResult = MessagePayloads[type].safeParse(message.payload);
-
-      if (!validationResult.success) {
-        console.error('Invalid payload:', validationResult.error);
-        return;
+    const message = JSON.parse(event.data.toString());
+    const handler = handlers[message.type as MessageType];
+    console.debug('Received message:', message);
+    
+    if (handler) {
+      const validationResult = MessagePayloads[message.type as MessageType].safeParse(message.payload);
+      
+      
+      if (validationResult.success) {
+        handler(validationResult.data, null);  // null indicates no error
+      } else {
+        handler(null, validationResult.error); // pass the Zod error object
       }
-
-      // Call the handler with the payload
-      handler(validationResult.data);
     }
   });
 
+  return {
+    registerHandler<T extends MessageType>(
+      type: T,
+      handler: (payload: z.infer<typeof MessagePayloads[T]> | null, error: z.ZodError<any> | null) => void
+    ): () => void {
+      handlers[type] = handler;
+      
+      return () => {
+        delete handlers[type];
+      };
+    }
+  };
 }
