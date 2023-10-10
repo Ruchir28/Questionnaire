@@ -14,7 +14,7 @@ export class Space {
     constructor(host: User) {
         this.id = uuidv4();
         this.host = host;
-        this.users = [];
+        this.users = [host];
     }
 
     addUser(user: User) {
@@ -25,7 +25,7 @@ export class Space {
         this.users = this.users.filter(u => u.id !== user.id);
     }
 
-    createQuestionaireRound(userId: string) {
+    createQuestionaireRound() {
         this.onGoingQuestionaireRound = new QuestionaireRound(this.host,this);
     }
 

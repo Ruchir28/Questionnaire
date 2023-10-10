@@ -59,12 +59,7 @@ export function handleWsEvents(ws: CustomWebSocket) {
         throw new Error("Space not found");
       }
       space.addUser(ws.user);
-      ws.send(
-        JSON.stringify({
-          message: "Joined space",
-          spaceId: space.id,
-        })
-      );
+      space_controller.broadCastQuestionaireRoundEvent(space.id, `${ws.user.name} joined the space`);
     } catch (e: any) {
       ws.send(
         JSON.stringify({
@@ -94,13 +89,14 @@ export function handleWsEvents(ws: CustomWebSocket) {
         if (space.host.id !== ws.user.id) {
           throw new Error("Only host can create a new round");
         }
-        space.createQuestionaireRound(ws.user.id);
-        ws.send(
-          JSON.stringify({
-            message: "Created a new Round",
-            spaceId: space.id,
-          })
-        );
+        space_controller.createQuestionaireRound(ws.user.id,space.id);
+        // ws.send(
+        //   JSON.stringify({
+        //     message: "Created a new Round",
+        //     spaceId: space.id,
+        //   })
+        // );
+        space_controller.broadCastQuestionaireRoundEvent(space.id, `Host started a questionairre round`);
       } catch (e: any) {
         ws.send(
           JSON.stringify({
@@ -128,13 +124,14 @@ export function handleWsEvents(ws: CustomWebSocket) {
       }
       let question = new Question(payload.text, ws.user);
       space.onGoingQuestionaireRound.addQuestion(question);
-      ws.send(
-        JSON.stringify({
-          message: "Question added",
-          spaceId: space.id,
-          questionId: question.id,
-        })
-      );
+    //   ws.send(
+    //     JSON.stringify({
+    //       message: "Question added",
+    //       spaceId: space.id,
+    //       questionId: question.id,
+    //     })
+    //   );
+      space_controller.broadCastQuestionaireRoundEvent(space.id, `${question.id} added, ${question.text}`);
     } catch (e: any) {
       ws.send(
         JSON.stringify({
@@ -159,14 +156,20 @@ export function handleWsEvents(ws: CustomWebSocket) {
         if (!space.onGoingQuestionaireRound) {
           throw new Error("No Round in progress");
         }
-        space.onGoingQuestionaireRound.upvoteQuestion(payload.questionId);
-        ws.send(
-          JSON.stringify({
-            message: "Question added",
-            spaceId: space.id,
-            questionId: payload.questionId,
-          })
-        );
+        let question = space.onGoingQuestionaireRound.getQuestion(payload.questionId);
+        if(!question) {
+            throw new Error("Question not found");
+        }
+        space.onGoingQuestionaireRound.upvoteQuestion(question.id);
+        // ws.send(
+        //   JSON.stringify({
+        //     message: "Question added",
+        //     spaceId: space.id,
+        //     questionId: payload.questionId,
+        //   })
+        // );
+
+      space_controller.broadCastQuestionaireRoundEvent(space.id, `${payload.questionId} upvoted, ${question.upvotes}`);
       } catch (e: any) {
         ws.send(
           JSON.stringify({

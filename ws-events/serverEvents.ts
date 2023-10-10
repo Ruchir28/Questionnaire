@@ -20,25 +20,6 @@ export enum RoundStatus {
   Ended = 'ended'
 }
 
-// Zod Schemas for Questions, Spaces, and Users
-export const Question = z.object({
-  text: z.string(),
-  upvotes: z.number()
-});
-
-export const User = z.object({
-  id: z.string(),
-  name: z.string()
-});
-
-export const Space = z.object({
-  id: z.string(),
-  host: User,
-  users: z.array(User),
-  questions: z.record(Question),
-  currentRoundType: z.union([z.literal(RoundType.Normal), z.literal(RoundType.Incremental), z.null()]),
-  currentRoundStatus: z.union([z.literal(RoundStatus.Active), z.literal(RoundStatus.Ended), z.null()])
-});
 
 // Zod Schemas for Message Payloads
 const CreateQuestionaireRoundPayLoad = z.object({
@@ -52,14 +33,12 @@ const EndCurrentRoundPayload = z.object({
 const CreateSpacePayload = z.object({});
 
 const JoinSpacePayload = z.object({
-  user: User,
   spaceId: z.string()
 });
 
 const PostQuestionPayload = z.object({
   text: z.string(),
   spaceId: z.string(),
-  userId: z.string()
 });
 
 const UpvoteQuestionPayload = z.object({

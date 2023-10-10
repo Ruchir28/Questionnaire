@@ -28,6 +28,10 @@ export class QuestionaireRound {
         this.questions.push(question);
     }
 
+    getQuestion(questionId: string) {
+        return this.questions.find(q => q.id === questionId);
+    }
+
     removeQuestion(question: Question) {    
         this.questions = this.questions.filter(q => q.text !== question.text);
     }

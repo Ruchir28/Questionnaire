@@ -23,7 +23,7 @@ export function spaceController() {
         deleteSpace: (spaceId: string) => {
             delete spaceMapping[spaceId];
         },
-        createQuestionaireRound: (spaceId: string): QuestionaireRound => {
+        createQuestionaireRound: (userId: string,spaceId: string): QuestionaireRound => {
             const space = spaceMapping[spaceId];
             
             if (!space) {
@@ -32,8 +32,30 @@ export function spaceController() {
             if(space.onGoingQuestionaireRound) {
                 throw new Error('Questionaire round already in progress');
             }
-            space.createQuestionaireRound(space.host.id);
+            if(userId !== space.host.id) {
+                throw new Error('Only host can create a new round');
+            }
+            
+            space.createQuestionaireRound();
             return space.onGoingQuestionaireRound!;
+        },
+        broadCastQuestionaireRoundEvent: (spaceId: string, event: string) => {
+            const space = spaceMapping[spaceId];
+            if (!space) {
+                throw new Error('Space not found');
+            }
+            space.users.forEach(u => {
+                console.log('sending event to user', u.id);
+                const userConnection = user_controller.getUserConnection(u.id);
+                if(userConnection) {
+                    userConnection.send(
+                        JSON.stringify({
+                            message: event,
+                            spaceId: space.id,
+                        })
+                    )
+                }
+            })
         }
     }
 }

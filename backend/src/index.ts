@@ -37,10 +37,12 @@ server.on('upgrade', (request, socket, head) => {
       return;
     }
     wss.handleUpgrade(request, socket, head, function done(ws: CustomWebSocket,req: http.IncomingMessage) {
-      ws.user = userController().getUser(req.headers['authorization'] as string);
+      let user_controller = userController();
+      ws.user = user_controller.getUser(req.headers['authorization'] as string);
       if(!ws.user){
         ws.close(4001, 'Unauthorized');
       }
+      user_controller.addUserConnectionMapping(ws.user.id, ws);
       wss.emit('connection', ws, request);
     });
 });
