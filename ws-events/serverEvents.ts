@@ -28,7 +28,7 @@ const CreateQuestionaireRoundPayLoad = z.object({
 
 const EndCurrentRoundPayload = z.object({
   spaceId: z.string()
-});
+}); 
 
 const CreateSpacePayload = z.object({});
 

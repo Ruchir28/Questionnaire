@@ -4,6 +4,10 @@ import {
   emitEvent,
   MessageType
 } from "@ruchir28/ws-events/serverEvents";
+import {
+    emitEvent as emitClientEvent,
+    MessageType as ClientMessageType
+} from "@ruchir28/ws-events/clientEvents"
 import { spaceController } from "./space";
 import { CustomWebSocket } from "../types/CustomWebSocket";
 import { Question } from "../models/Question";
@@ -59,7 +63,13 @@ export function handleWsEvents(ws: CustomWebSocket) {
         throw new Error("Space not found");
       }
       space.addUser(ws.user);
-      space_controller.broadCastQuestionaireRoundEvent(space.id, `${ws.user.name} joined the space`);
+      space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
+        emitClientEvent(userWs,ClientMessageType.UserJoinedSpace,{
+            spaceId: space.id,
+            userId: userWs.user!.id, // taken care in zod validation
+            userName: userWs.user!.name 
+          });
+      });
     } catch (e: any) {
       ws.send(
         JSON.stringify({
@@ -96,7 +106,11 @@ export function handleWsEvents(ws: CustomWebSocket) {
         //     spaceId: space.id,
         //   })
         // );
-        space_controller.broadCastQuestionaireRoundEvent(space.id, `Host started a questionairre round`);
+        space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
+            emitClientEvent(userWs,ClientMessageType.RoundStarted,{
+                spaceId: space.id,// taken care in zod validatio
+            });
+          });
       } catch (e: any) {
         ws.send(
           JSON.stringify({
@@ -131,7 +145,14 @@ export function handleWsEvents(ws: CustomWebSocket) {
     //       questionId: question.id,
     //     })
     //   );
-      space_controller.broadCastQuestionaireRoundEvent(space.id, `${question.id} added, ${question.text}`);
+    space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
+        emitClientEvent(userWs,ClientMessageType.NewQuestion,{
+            text: question.text,
+            questionId: question.id,
+            userId: question.user.id,
+            userName: question.user.name
+        });
+      });;
     } catch (e: any) {
       ws.send(
         JSON.stringify({
@@ -168,8 +189,13 @@ export function handleWsEvents(ws: CustomWebSocket) {
         //     questionId: payload.questionId,
         //   })
         // );
-
-      space_controller.broadCastQuestionaireRoundEvent(space.id, `${payload.questionId} upvoted, ${question.upvotes}`);
+        let questionId = question.id;
+        space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
+            emitClientEvent(userWs,ClientMessageType.UpvoteQuestion,{
+                questionId: questionId,
+                spaceId: space.id
+            });
+          });
       } catch (e: any) {
         ws.send(
           JSON.stringify({
