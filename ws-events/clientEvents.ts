@@ -1,5 +1,6 @@
 import { z } from "zod";
 import WebSocket from "ws";
+import { IWebSocket } from "./IWebSocket";
 
 export enum MessageType {
   NewQuestion = "newQuestion",
@@ -45,7 +46,7 @@ export const ClientMessagePayloads = {
 };
 
 export function emitEvent<T extends MessageType>(
-  ws: WebSocket,
+  ws: IWebSocket,
   type: T,
   payload: z.infer<(typeof ClientMessagePayloads)[T]>
 ): void {
@@ -65,13 +66,13 @@ export function emitEvent<T extends MessageType>(
   );
 }
 
-export function createClientHandlerManager(ws: WebSocket) {
+export function createClientHandlerManager(ws: IWebSocket) {
   const handlers: {
     [key in MessageType]?: (payload: any, error: z.ZodError | null) => void;
   } = {};
 
-  ws.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data.toString());
+  ws.onMessage((data) => {
+    const message = JSON.parse(data);
     const handler = handlers[message.type as MessageType];
     console.debug("Received message:", message);
 

@@ -6,6 +6,7 @@ import {createHandlerManager,emitEvent} from "@ruchir28/ws-events/serverEvents"
 import { handleWsEvents } from './controllers/ws';
 import { CustomWebSocket } from './types/CustomWebSocket';
 import { logIn, userController } from './controllers/user';
+import { WebSocket } from 'ws';
 
 const app = express()
 const port = 8000
@@ -36,14 +37,15 @@ server.on('upgrade', (request, socket, head) => {
       socket.destroy();
       return;
     }
-    wss.handleUpgrade(request, socket, head, function done(ws: CustomWebSocket,req: http.IncomingMessage) {
+    wss.handleUpgrade(request, socket, head, function done(ws: WebSocket,req: http.IncomingMessage) {
       let user_controller = userController();
-      ws.user = user_controller.getUser(req.headers['authorization'] as string);
-      if(!ws.user){
-        ws.close(4001, 'Unauthorized');
+      let customWebSocket = new CustomWebSocket(ws);
+      customWebSocket.user = user_controller.getUser(req.headers['authorization'] as string);
+      if(!customWebSocket.user){
+        customWebSocket.ws.close(4001, 'Unauthorized');
       }
-      user_controller.addUserConnectionMapping(ws.user.id, ws);
-      wss.emit('connection', ws, request);
+      user_controller.addUserConnectionMapping(customWebSocket.user.id, customWebSocket);
+      wss.emit('connection', customWebSocket, request);
     });
 });
 

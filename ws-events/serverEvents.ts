@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import WebSocket from 'ws';
+import { IWebSocket } from './IWebSocket';
 // Enums for Message Types, Round Types, and Round Status
 export enum MessageType {
   CreateQuestionaireRound = 'createQuestionaireRound',
@@ -57,7 +57,7 @@ const MessagePayloads = {
 
 // Utility function for emitting events with enforced payload types using Zod
 export function emitEvent<T extends MessageType>(
-  ws: WebSocket, 
+  ws: IWebSocket, 
   type: T, 
   payload: z.infer<typeof MessagePayloads[T]>
 ): void {
@@ -78,11 +78,11 @@ export function emitEvent<T extends MessageType>(
 }
 
 
-export function createHandlerManager(ws: WebSocket) {
+export function createHandlerManager(ws: IWebSocket) {
   const handlers: { [key in MessageType]?: (payload: any, error: z.ZodError | null) => void } = {};
-
-  ws.addEventListener('message', (event) => {
-    const message = JSON.parse(event.data.toString());
+  console.log('WS',ws);
+  ws.onMessage((data: string) => {
+    const message = JSON.parse(data);
     const handler = handlers[message.type as MessageType];
     console.debug('Received message:', message);
     
