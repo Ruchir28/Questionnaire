@@ -1,21 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
+import { FrontEndWebSocket } from '../utils/FrontendWebSocket';
+import {WEBSOCKET_URL} from '../constant'
+let webSocket: FrontEndWebSocket | null = null;
 
-let ws: WebSocket | null = null;
-
-export const useWebSocket = (url: string) => {
+export const useWebSocket = () => {
   const [isConnected, setConnected] = useState(false);
 
   const initWebSocket = useCallback(() => {
-    if (!ws) {
-      ws = new WebSocket(url);
-      ws.addEventListener('open', () => setConnected(true));
-      ws.addEventListener('close', () => setConnected(false));
+    if (!webSocket) {
+      webSocket = new FrontEndWebSocket(WEBSOCKET_URL);
+      webSocket.ws.addEventListener('open', () => setConnected(true));
+      webSocket.ws.addEventListener('close', () => setConnected(false));
     }
-  }, [url]);
+  },[]);
 
   useEffect(() => {
     initWebSocket();
   }, [initWebSocket]);
 
-  return { ws, isConnected };
+  return { webSocket, isConnected };
 };
