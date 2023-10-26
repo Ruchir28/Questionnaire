@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import useAuth from "../hooks/useAuth";
+import useAuth, { AuthStatus } from "../hooks/useAuth";
 import {useNavigate} from 'react-router-dom'
 
 const withAuth = <P extends object>(
@@ -9,10 +9,15 @@ const withAuth = <P extends object>(
     const isAuthenticated = useAuth(); 
     const navigate = useNavigate();
     useEffect(()=>{
-      if (!isAuthenticated) {
-        navigate("/login")
+      console.log("State is",isAuthenticated);
+      if (isAuthenticated === AuthStatus.NotAuthenticated) {
+         navigate("/login");
+        console.log("Not Authenticated");
       }
     },[isAuthenticated,navigate]);
+    if(isAuthenticated === AuthStatus.Loading) {
+      return <div>Loading...</div>
+    }
     return <WrappedComponent {...props} />;
   };
 };

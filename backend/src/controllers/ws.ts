@@ -4,8 +4,8 @@ import {
   MessageType
 } from "@ruchir28/ws-events/serverEvents";
 import {
-    emitEvent as emitClientEvent,
-    MessageType as ClientMessageType
+    emitClientEvent,
+    ClientMessageType
 } from "@ruchir28/ws-events/clientEvents"
 import { spaceController } from "./space";
 import { CustomWebSocket } from "../types/CustomWebSocket";
@@ -28,12 +28,10 @@ export function handleWsEvents(ws: CustomWebSocket) {
       }
       let space = space_controller.createSpace(ws.user.id);
       // return the created space id to user
-      ws.send(
-        JSON.stringify({
-          message: "Space created",
-          spaceId: space.id,
-        })
-      );
+      emitClientEvent(ws,ClientMessageType.SpaceCreated,{
+          spaceId: space.id
+      });
+      console.log("Space Created", space.id);
     } catch (e: any) {
       ws.send(
         JSON.stringify({
@@ -65,8 +63,8 @@ export function handleWsEvents(ws: CustomWebSocket) {
       space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
         emitClientEvent(userWs,ClientMessageType.UserJoinedSpace,{
             spaceId: space.id,
-            userId: userWs.user!.id, // taken care in zod validation
-            userName: userWs.user!.name 
+            userId: ws.user!.id, // taken care in zod validation
+            userName: ws.user!.name 
           });
       });
     } catch (e: any) {

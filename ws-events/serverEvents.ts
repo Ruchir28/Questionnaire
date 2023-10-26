@@ -80,7 +80,6 @@ export function emitEvent<T extends MessageType>(
 
 export function createHandlerManager(ws: IWebSocket) {
   const handlers: { [key in MessageType]?: (payload: any, error: z.ZodError | null) => void } = {};
-  console.log('WS',ws);
   ws.onMessage((data: string) => {
     const message = JSON.parse(data);
     const handler = handlers[message.type as MessageType];

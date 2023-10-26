@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { MessageType } from "@ruchir28/ws-events/clientEvents"; // Import your message types
+import { ClientMessageType } from "@ruchir28/ws-events"; // Import your message types
 import { useWebSocket } from "./useWebSocket";
-import { createClientHandlerManager } from "@ruchir28/ws-events/clientEvents";
+import { createClientHandlerManager } from "@ruchir28/ws-events";
 import useAuth from "./useAuth";
 
 function useSpace(spaceId: string) {
@@ -13,7 +13,7 @@ function useSpace(spaceId: string) {
   const [users, setUsers] = useState<string[]>([]);
   const [currentRound, setCurrentRound] = useState<boolean>(false);
 
-  // Initialize client handler
+  
   const clientHandler = useMemo(() => {
       return webSocket ? createClientHandlerManager(webSocket) : null;
   }, [webSocket]);
@@ -23,7 +23,7 @@ function useSpace(spaceId: string) {
     if (isAuthenticated && webSocket && clientHandler) {
       // Register handlers for different message types
       const unregisterNewQuestion = clientHandler.registerHandler(
-        MessageType.NewQuestion,
+        ClientMessageType.NewQuestion,
         (payload, error) => {
           if (payload) {
             setQuestions((prevQuestions) => [
@@ -35,16 +35,17 @@ function useSpace(spaceId: string) {
       );
 
       const unregisterUserJoined = clientHandler.registerHandler(
-        MessageType.UserJoinedSpace,
+        ClientMessageType.UserJoinedSpace,
         (payload, error) => {
           if (payload) {
-            setUsers((prevUsers) => [...prevUsers, payload.userName]);
+            console.log("User Joined", payload);
+            setUsers((prevUsers) => [...prevUsers, payload.userId]);
           }
         }
       );
 
       const unregisterRoundStarted = clientHandler.registerHandler(
-        MessageType.RoundStarted,
+        ClientMessageType.RoundStarted,
         (payload, error) => {
           if (payload?.spaceId === spaceId) {
             setCurrentRound(true);
@@ -53,7 +54,7 @@ function useSpace(spaceId: string) {
       );
 
       const unregisterRoundEnded = clientHandler.registerHandler(
-        MessageType.RoundEnded,
+        ClientMessageType.RoundEnded,
         (payload, error) => {
           if (payload?.spaceId === spaceId) {
             setCurrentRound(false);
@@ -62,7 +63,7 @@ function useSpace(spaceId: string) {
       );
 
       const unregisterUpvoteQuestion = clientHandler.registerHandler(
-        MessageType.UpvoteQuestion,
+        ClientMessageType.UpvoteQuestion,
         (payload, error) => {
           if (payload) {
             setQuestions((prevQuestions) => {
@@ -72,7 +73,8 @@ function useSpace(spaceId: string) {
               if (question) {
                 question.upvotes += 1;
               }
-              return [...prevQuestions];
+              const sortedQuestions = prevQuestions.sort((a,b)=>b.upvotes-a.upvotes);
+              return [...sortedQuestions];
             });
           }
         }

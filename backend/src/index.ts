@@ -7,11 +7,30 @@ import { handleWsEvents } from './controllers/ws';
 import { CustomWebSocket } from './types/CustomWebSocket';
 import { logIn, userController } from './controllers/user';
 import { WebSocket } from 'ws';
+import cors from 'cors';
 
 const app = express()
 const port = 8000
 
 app.use(express.json());
+app.use(cors());
+
+
+function parseCookies(request: http.IncomingMessage): { [key: string]: string } {
+  const list: { [key: string]: string } = {};
+  const rc = request.headers.cookie;
+
+  rc && rc.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    const key = parts.shift()?.trim();
+    const value = decodeURI(parts.join('=')?.trim());
+    if(key && value) {
+      list[key] = value;
+    }
+  });
+
+  return list;
+}
 
 
 // Initialize a basic HTTP server using Express
@@ -24,10 +43,16 @@ const wss = new WebSocketServer({ path: '/ws', noServer: true});
 
 const authenticateJWT = (req: http.IncomingMessage) => {
   console.log('Authenticating request...');
-  if(req.headers['authorization'] === undefined){
+
+  const cookies = parseCookies(req);
+
+  console.log(cookies);
+
+  if(cookies['authToken'] === undefined){
     return false;
   }
   console.log(req.headers['authorization']);
+  console.log(cookies['authToken']);
   return true;
 }
 
@@ -37,12 +62,14 @@ server.on('upgrade', (request, socket, head) => {
       socket.destroy();
       return;
     }
+    const cookies = parseCookies(request);
     wss.handleUpgrade(request, socket, head, function done(ws: WebSocket,req: http.IncomingMessage) {
       let user_controller = userController();
       let customWebSocket = new CustomWebSocket(ws);
-      customWebSocket.user = user_controller.getUser(req.headers['authorization'] as string);
+      customWebSocket.user = user_controller.getUser(cookies['authToken'] as string);
       if(!customWebSocket.user){
         customWebSocket.ws.close(4001, 'Unauthorized');
+        return;
       }
       user_controller.addUserConnectionMapping(customWebSocket.user.id, customWebSocket);
       wss.emit('connection', customWebSocket, request);
