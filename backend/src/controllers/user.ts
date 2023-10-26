@@ -15,7 +15,7 @@ export function userController() {
     addUserConnectionMapping: (userId: string, ws: CustomWebSocket) => {
       userConnectionMapping[userId] = ws;
       // removing user from mapping when connection is closed
-      ws.on("close", () => {
+      ws.ws.on("close", () => {
         delete userConnectionMapping[userId];
       });
     },

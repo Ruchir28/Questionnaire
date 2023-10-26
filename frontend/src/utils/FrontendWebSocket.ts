@@ -1,14 +1,9 @@
-import { User } from "../models/User";
-import {WebSocket} from 'ws';
-import {IWebSocket} from '@ruchir28/ws-events/IWebSocket'
-
-export class CustomWebSocket implements IWebSocket{
+import { IWebSocket } from "@ruchir28/ws-events/IWebSocket";
+export class FrontEndWebSocket implements IWebSocket {
     ws: WebSocket;
-    constructor(ws: WebSocket) {
-        this.ws = ws;
+    constructor(url: string) {
+        this.ws = new WebSocket(url);
     }
-
-    user?: User;
     send(data: string) {
         this.ws.send(data);
     };
@@ -17,5 +12,5 @@ export class CustomWebSocket implements IWebSocket{
             let data = event.data.toString();
             handler(data);
         });
-    };  
+    };
 }

@@ -1,13 +1,15 @@
 import { z } from "zod";
 import WebSocket from "ws";
+import { IWebSocket } from "./IWebSocket";
 
-export enum MessageType {
+export enum ClientMessageType {
   NewQuestion = "newQuestion",
   RoundStarted = "roundStarted",
   RoundEnded = "roundEnded",
   UpvoteQuestion = "upvoteQuestion",
   UserJoinedSpace = "userJoinedSpace",
-}
+  SpaceCreated = "spaceCreated",
+  }
 
 export const NewQuestionPayload = z.object({
   text: z.string(),
@@ -35,17 +37,22 @@ export const UserJoinedSpacePayload = z.object({
   spaceId: z.string(),
 });
 
+export const SpaceCreatedPayload = z.object({
+  spaceId: z.string(),
+});
+
 // Zod Schemas for Client Message Payloads
 export const ClientMessagePayloads = {
-  [MessageType.NewQuestion]: NewQuestionPayload,
-  [MessageType.RoundStarted]: RoundStartedPayload,
-  [MessageType.RoundEnded]: RoundEndedPayload,
-  [MessageType.UpvoteQuestion]: UpvoteQuestionPayload,
-  [MessageType.UserJoinedSpace]: UserJoinedSpacePayload,
+  [ClientMessageType.NewQuestion]: NewQuestionPayload,
+  [ClientMessageType.RoundStarted]: RoundStartedPayload,
+  [ClientMessageType.RoundEnded]: RoundEndedPayload,
+  [ClientMessageType.UpvoteQuestion]: UpvoteQuestionPayload,
+  [ClientMessageType.UserJoinedSpace]: UserJoinedSpacePayload,
+  [ClientMessageType.SpaceCreated]: SpaceCreatedPayload,
 };
 
-export function emitEvent<T extends MessageType>(
-  ws: WebSocket,
+export function emitClientEvent<T extends ClientMessageType>(
+  ws: IWebSocket,
   type: T,
   payload: z.infer<(typeof ClientMessagePayloads)[T]>
 ): void {
@@ -65,19 +72,19 @@ export function emitEvent<T extends MessageType>(
   );
 }
 
-export function createClientHandlerManager(ws: WebSocket) {
+export function createClientHandlerManager(ws: IWebSocket) {
   const handlers: {
-    [key in MessageType]?: (payload: any, error: z.ZodError | null) => void;
+    [key in ClientMessageType]?: (payload: any, error: z.ZodError | null) => void;
   } = {};
 
-  ws.addEventListener("message", (event) => {
-    const message = JSON.parse(event.data.toString());
-    const handler = handlers[message.type as MessageType];
+  ws.onMessage((data) => {
+    const message = JSON.parse(data);
+    const handler = handlers[message.type as ClientMessageType];
     console.debug("Received message:", message);
 
     if (handler) {
       const validationResult = ClientMessagePayloads[
-        message.type as MessageType
+        message.type as ClientMessageType
       ].safeParse(message.payload);
 
       if (validationResult.success) {
@@ -89,7 +96,7 @@ export function createClientHandlerManager(ws: WebSocket) {
   });
 
   return {
-    registerHandler<T extends MessageType>(
+    registerHandler<T extends ClientMessageType>(
       type: T,
       handler: (
         payload: z.infer<(typeof ClientMessagePayloads)[T]> | null,
