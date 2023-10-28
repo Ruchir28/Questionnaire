@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ClientMessageType } from "@ruchir28/ws-events"; // Import your message types
+import { ClientMessageType, MessageType, emitClientEvent, emitEvent } from "@ruchir28/ws-events"; // Import your message types
 import { useWebSocket } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import useAuth from "./useAuth";
 
 function useSpace(spaceId: string) {
-  const { webSocket } = useWebSocket();
+  const { webSocket, isConnected} = useWebSocket();
   const isAuthenticated = useAuth();
 
   // Example state variables
@@ -20,7 +20,9 @@ function useSpace(spaceId: string) {
 
 
   useEffect(() => {
-    if (isAuthenticated && webSocket && clientHandler) {
+    console.log("In here 1")
+    if (isAuthenticated && isConnected &&  webSocket && clientHandler) {
+      console.log("In here 2")
       // Register handlers for different message types
       const unregisterNewQuestion = clientHandler.registerHandler(
         ClientMessageType.NewQuestion,
@@ -80,6 +82,40 @@ function useSpace(spaceId: string) {
         }
       );
 
+      const unregisterGetQuestionsForSpace = clientHandler.registerHandler(
+        ClientMessageType.GetQuestionsForSpace,
+        (payload, error) => {
+          console.log("Get Questions for space", payload);
+          if (payload) {
+            setQuestions((prevQuestions) => {
+              return [...payload.questions.map((question) => new Question(question.questionId, question.text, question.upvotes))];
+            });
+          }
+        }
+      );
+
+      const unregisterGetSpaceInfo = clientHandler.registerHandler(ClientMessageType.GetSpaceInfo,(payload,error) => {
+        if(payload) {
+          console.log("Get Space Info",payload);
+          setUsers(() => [...payload.users.map((user) => user.userName)]);
+          setQuestions(() => [...payload.questions.map((question) => new Question(question.questionId, question.text, question.upvotes))]);
+          setCurrentRound(payload.currentRound);
+        }
+      });
+
+      const unregisterError = clientHandler.registerHandler(
+        ClientMessageType.Error,
+        (payload, error) => {
+          if (payload) {
+            console.error("Error", payload);
+          }
+        }
+      );
+
+      emitEvent(webSocket, MessageType.GetSpaceInfo, {
+        spaceId: spaceId
+      });
+
       return () => {
         // Clean up: Unregister handlers
         unregisterNewQuestion();
@@ -87,9 +123,12 @@ function useSpace(spaceId: string) {
         unregisterRoundStarted();
         unregisterRoundEnded();
         unregisterUpvoteQuestion();
+        unregisterGetQuestionsForSpace();
+        unregisterError();
+        unregisterGetSpaceInfo();
       };
     }
-  }, [spaceId, isAuthenticated, webSocket, clientHandler]);
+  }, [spaceId, isAuthenticated, webSocket, clientHandler,isConnected]);
 
   return {
     questions,

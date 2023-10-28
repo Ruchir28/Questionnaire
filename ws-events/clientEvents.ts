@@ -9,6 +9,9 @@ export enum ClientMessageType {
   UpvoteQuestion = "upvoteQuestion",
   UserJoinedSpace = "userJoinedSpace",
   SpaceCreated = "spaceCreated",
+  GetQuestionsForSpace = "getQuestionsforSpace",
+  GetSpaceInfo = "spaceInfo",
+  Error = "error",
   }
 
 export const NewQuestionPayload = z.object({
@@ -41,6 +44,35 @@ export const SpaceCreatedPayload = z.object({
   spaceId: z.string(),
 });
 
+export const GetQuestionsForSpacePayload = z.object({
+  spaceId: z.string(),
+  questions: z.array(z.object({
+    text: z.string(),
+    questionId: z.string(),
+    userName: z.string(),
+    upvotes: z.number()
+  }))
+});
+
+export const GetSpaceInfoPayload = z.object({
+  spaceId: z.string(),
+  users: z.array(z.object({
+    userName: z.string(),
+  })),
+  questions: z.array(z.object({
+    text: z.string(),
+    questionId: z.string(),
+    userName: z.string(),
+    upvotes: z.number()
+  })),
+  currentRound: z.boolean(),
+});
+
+
+export const ErrorPayload = z.object({
+  message: z.string()
+});
+
 // Zod Schemas for Client Message Payloads
 export const ClientMessagePayloads = {
   [ClientMessageType.NewQuestion]: NewQuestionPayload,
@@ -49,6 +81,9 @@ export const ClientMessagePayloads = {
   [ClientMessageType.UpvoteQuestion]: UpvoteQuestionPayload,
   [ClientMessageType.UserJoinedSpace]: UserJoinedSpacePayload,
   [ClientMessageType.SpaceCreated]: SpaceCreatedPayload,
+  [ClientMessageType.GetQuestionsForSpace]: GetQuestionsForSpacePayload,
+  [ClientMessageType.GetSpaceInfo]: GetSpaceInfoPayload,
+  [ClientMessageType.Error]: ErrorPayload,
 };
 
 export function emitClientEvent<T extends ClientMessageType>(

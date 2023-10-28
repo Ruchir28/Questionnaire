@@ -12,6 +12,7 @@ const Home = () => {
     
     const {webSocket,isConnected} = useWebSocket();
     const [spaceName, setSpaceName] = React.useState<string>('');
+    const [joinSpace,setJoinSpace] = React.useState<string>('');
      const {spaces} = useSpaceManager()
     if(!webSocket && !isConnected) {
         return <div>Connecting...</div>
@@ -39,6 +40,13 @@ const Home = () => {
                 )
             })}
             </ul>
+            <div>
+                Join Space 
+                <input value={joinSpace} onChange={e => setJoinSpace(e.target.value)}></input>
+                <button onClick={() => {
+                    emitEvent(webSocket!,MessageType.JoinSpace,{spaceId: joinSpace});
+                }}>Join</button>
+            </div>
         </div>
     );
 };
