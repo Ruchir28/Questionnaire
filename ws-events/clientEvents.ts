@@ -11,6 +11,7 @@ export enum ClientMessageType {
   SpaceCreated = "spaceCreated",
   GetQuestionsForSpace = "getQuestionsforSpace",
   GetSpaceInfo = "spaceInfo",
+  GetAllSpaces = "getAllSpaces",
   Error = "error",
   }
 
@@ -68,6 +69,9 @@ export const GetSpaceInfoPayload = z.object({
   currentRound: z.boolean(),
 });
 
+export const GetAllSpacesPayload = z.object({
+  spaceIds: z.array(z.string())
+});
 
 export const ErrorPayload = z.object({
   message: z.string()
@@ -83,6 +87,7 @@ export const ClientMessagePayloads = {
   [ClientMessageType.SpaceCreated]: SpaceCreatedPayload,
   [ClientMessageType.GetQuestionsForSpace]: GetQuestionsForSpacePayload,
   [ClientMessageType.GetSpaceInfo]: GetSpaceInfoPayload,
+  [ClientMessageType.GetAllSpaces]: GetAllSpacesPayload,
   [ClientMessageType.Error]: ErrorPayload,
 };
 

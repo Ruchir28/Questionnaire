@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import useAuth, { AuthStatus } from "./useAuth";
 import { useWebSocket } from "./useWebSocket";
- import { ClientMessageType } from "@ruchir28/ws-events";
+ import { ClientMessageType, emitEvent, MessageType } from "@ruchir28/ws-events";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
-
-export const useSpaceManager = () => {
+const useSpaceManager = () => {
     const authStatus = useAuth();
     const { isConnected,webSocket } = useWebSocket();
 
@@ -14,15 +13,24 @@ export const useSpaceManager = () => {
 
     const clientHandler = useMemo(() => {
         return webSocket ? createClientHandlerManager(webSocket) : null;
-    }, [isConnected,webSocket]);
+    }, [webSocket]);
 
     const [spaces,setSpaces] = useState<string[]>([]);
 
     useEffect(() => {
-        console.log("INSIDE USE EFFECT FOR SPACE MANAGER",isConnected,webSocket,authStatus,clientHandler);
         if(isConnected && webSocket && authStatus === AuthStatus.Authenticated && clientHandler) {
         
             console.log("Registering Space Created Handler");
+
+            const unregisterGetSpacesInfo = clientHandler.registerHandler(ClientMessageType.GetAllSpaces,(payload,error) => {
+                if(payload) {
+                    console.log("Get All Spaces",payload);
+                     setSpaces(payload.spaceIds);
+                } else {
+                    console.log("Error",error);
+                }
+            });
+
             const unregisterSpaceCreated = clientHandler.registerHandler(ClientMessageType.SpaceCreated,(payload,error) => {
                 if(payload) {
                     console.log("Space Created",payload);
@@ -30,8 +38,11 @@ export const useSpaceManager = () => {
                 }
             });
 
+            emitEvent(webSocket,MessageType.GetSpaces,{});
+
             return () => {
                 unregisterSpaceCreated();
+                unregisterGetSpacesInfo();
             }
         }
     },[webSocket,clientHandler,authStatus,isConnected]);

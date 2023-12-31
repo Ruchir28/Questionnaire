@@ -304,4 +304,24 @@ export function handleWsEvents(ws: CustomWebSocket) {
       });
     }
   });
+
+  handlerManager.registerHandler(MessageType.GetSpaces, (payload, error) => {
+    try {
+      if (error || !payload) {
+        throw new Error("Invalid payload:" + error);
+      }
+      if (!ws.user) {
+        throw new Error("User Not logged in");
+      }
+      let spaceIds = space_controller.getSpacesForUser(ws.user.id);
+      emitClientEvent(ws, ClientMessageType.GetAllSpaces, {
+        spaceIds,
+      });
+    } catch (e: any) {
+      console.error(e);
+      emitClientEvent(ws, ClientMessageType.Error, {
+        message: e.message,
+      });
+    }
+  });
 }

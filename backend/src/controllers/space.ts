@@ -54,5 +54,10 @@ export function spaceController() {
         return userConnection;
       });
     },
+    getSpacesForUser: (userId: string): string[] => {
+      return Object.values(spaceMapping).filter((space) => {
+        return space.users.find((user) => user.id === userId);
+      }).map((space) => space.id);
+    }
   };
 }
