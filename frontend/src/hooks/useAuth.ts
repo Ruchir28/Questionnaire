@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-
+import { useWebSocket } from "./useWebSocket";
 export enum AuthStatus {
   Loading = 'Loading',
   Authenticated = 'Authenticated',
@@ -8,32 +8,30 @@ export enum AuthStatus {
 
 function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(AuthStatus.Loading);
+  const {webSocket,isConnected} = useWebSocket();
 
   const checkAuthStatus = useCallback(() =>{
     const authToken = parseCookies(document.cookie)["authToken"];
     console.log("Value is",(!!authToken && authToken.length > 0));
     const isAuthenticated = !!authToken && authToken.length > 0;
-
-    setIsAuthenticated(isAuthenticated ? AuthStatus.Authenticated : AuthStatus.NotAuthenticated);
-    console.log("isAuthenticated",isAuthenticated);
-  },[]);
+    return isAuthenticated;
+    },[]);
 
   useEffect(() => {
-    console.log("check here",isAuthenticated);
-  },[isAuthenticated]);
-
-  useEffect(() => {
-    checkAuthStatus();
-
-    // Periodic check every 5 minutes
-    const intervalId = setInterval(() => {
-      checkAuthStatus();
-    }, 5  * 1000);
-
+    const tokeanAvailable = checkAuthStatus();
+    if(tokeanAvailable && webSocket && isConnected) {
+      setIsAuthenticated(AuthStatus.Authenticated);
+    } else {
+      setIsAuthenticated(AuthStatus.NotAuthenticated);
+    }
     return () => {
-      clearInterval(intervalId);
-    };
-  }, [checkAuthStatus]);
+      document.cookie = document.cookie.split(";").filter((c) => {
+        let cookie = c.split("=");
+        let cookieName = cookie[0].trim();
+        return cookieName !== "authToken";
+      }).join(";");
+    }
+  }, [checkAuthStatus,webSocket,isConnected]);
 
   return isAuthenticated;
 }

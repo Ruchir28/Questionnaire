@@ -11,6 +11,7 @@ export enum MessageType {
   GetQuestions = 'getQuestions',
   GetSpaces = 'getSpaces',
   GetSpaceInfo = 'getSpaceInfo',
+  VerifyUser = 'verifyUser'
 }
 
 export enum RoundType {
@@ -59,6 +60,8 @@ const GetSpaceInfoPayload = z.object({
 
 const GetSpacesPayload = z.object({});
 
+const VerifyUserPayload = z.object({});
+
 const MessagePayloads = {
   [MessageType.CreateQuestionaireRound]: CreateQuestionaireRoundPayLoad,
   [MessageType.EndCurrentRound]: EndCurrentRoundPayload,
@@ -69,6 +72,7 @@ const MessagePayloads = {
   [MessageType.GetQuestions]: GetQuestionsPayload,
   [MessageType.GetSpaces]: GetSpacesPayload,
   [MessageType.GetSpaceInfo]: GetSpaceInfoPayload,
+  [MessageType.VerifyUser]: VerifyUserPayload
 };
 
 // Utility function for emitting events with enforced payload types using Zod

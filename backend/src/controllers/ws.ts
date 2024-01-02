@@ -18,6 +18,24 @@ export function handleWsEvents(ws: CustomWebSocket) {
 
   let space_controller = spaceController();
 
+  handlerManager.registerHandler(MessageType.VerifyUser, (payload, error) => {
+    try {
+      if (error || !payload) {
+        throw new Error("Invalid payload:" + error?.message);
+      }
+      if (!ws.user) {
+        throw new Error("User Not logged in");
+      }
+      emitClientEvent(ws, ClientMessageType.UserVerficationStatus, {
+        status: true,
+      });
+    } catch (e: any) {
+      emitClientEvent(ws, ClientMessageType.UserVerficationStatus, {
+        status: false,
+      });
+    }
+  });
+
   handlerManager.registerHandler(MessageType.CreateSpace, (payload, error) => {
     try {
       if (error || !payload) {
@@ -42,22 +60,25 @@ export function handleWsEvents(ws: CustomWebSocket) {
   });
 
   handlerManager.registerHandler(MessageType.JoinSpace, (payload, error) => {
-    if (error || !payload) {
-      console.error("Invalid payload:", error);
-      return;
-    }
-    if (!ws.user) {
-      ws.send(
-        JSON.stringify({
-          message: "User Not logged in",
-        })
-      );
-      return;
-    }
     try {
+      if (error || !payload) {
+        console.error("Invalid payload:", error);
+        return;
+      }
+      if (!ws.user) {
+        ws.send(
+          JSON.stringify({
+            message: "User Not logged in",
+          })
+        );
+        return;
+      }
       let space = space_controller.getSpace(payload.spaceId);
       if (!space) {
         throw new Error("Space not found");
+      }
+      if(space.users.find((u) => u.id === ws.user!.id)) {
+        throw new Error("User already in space");
       }
       space.addUser(ws.user);
       space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
@@ -68,6 +89,7 @@ export function handleWsEvents(ws: CustomWebSocket) {
         });
       });
     } catch (e: any) {
+      console.error(e);
       emitClientEvent(ws, ClientMessageType.Error, {
         message: e.message,
       });

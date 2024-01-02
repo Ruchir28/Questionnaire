@@ -12,7 +12,7 @@ const Space: React.FC<SpaceProps> = () => {
   const { webSocket, isConnected } = useWebSocket();
   const [question, setQuestion] = React.useState<string>("");
   return (
-    <div>
+    <div> 
       SPACE {spaceId}
       <div>
         {space?.questions.map((question) => {

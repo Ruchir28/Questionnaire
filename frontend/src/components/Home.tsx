@@ -4,6 +4,9 @@ import withAuth from '../hoc/withAuth';
 import {emitEvent,MessageType} from '@ruchir28/ws-events'
 import useSpaceManager from '../hooks/useSpaceManager';
 import { Link } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 // Define the type of the props object that will be passed to the component
 
@@ -24,8 +27,10 @@ const Home = () => {
             <input value={spaceName} onChange={e => setSpaceName(e.target.value)}></input>
             <button onClick={() => {
                 if(webSocket && isConnected) {
+                    console.log("Emitting event",webSocket);
                      emitEvent(webSocket,MessageType.CreateSpace,{spaceName});
                 } else {
+                    toast.error("Not connected !! Login Again");
                     console.log("Socket not connected");
                 }
             }}> 
@@ -47,6 +52,7 @@ const Home = () => {
                     emitEvent(webSocket!,MessageType.JoinSpace,{spaceId: joinSpace});
                 }}>Join</button>
             </div>
+            <ToastContainer />
         </div>
     );
 };

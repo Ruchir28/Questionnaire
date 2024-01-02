@@ -2,9 +2,13 @@ import React from "react";
 import { useState } from "react";
 import { BACKEND_URL } from "../constant";
 import Cookies from "js-cookie";
+import {Navigate} from 'react-router-dom'
+import useAuth, { AuthStatus } from "../hooks/useAuth";
 
 function Login() {
   const [name, setName] = useState("");
+  const isAuthenticated = useAuth();
+  console.log("State is",isAuthenticated);
 
   async function onSubmit(e: any) {
     e.preventDefault();
@@ -24,6 +28,10 @@ function Login() {
       .catch((err) => {
         console.log("Login Failed");
       });
+  }
+
+  if(isAuthenticated === AuthStatus.Authenticated) {
+    return <Navigate to="/"></Navigate>
   }
 
   return (

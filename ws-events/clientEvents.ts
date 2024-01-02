@@ -13,6 +13,7 @@ export enum ClientMessageType {
   GetSpaceInfo = "spaceInfo",
   GetAllSpaces = "getAllSpaces",
   Error = "error",
+  UserVerficationStatus = "userVerficationStatus"
   }
 
 export const NewQuestionPayload = z.object({
@@ -77,6 +78,10 @@ export const ErrorPayload = z.object({
   message: z.string()
 });
 
+export const UserVerficationStatusPayload = z.object({
+  status: z.boolean()
+});
+
 // Zod Schemas for Client Message Payloads
 export const ClientMessagePayloads = {
   [ClientMessageType.NewQuestion]: NewQuestionPayload,
@@ -89,6 +94,7 @@ export const ClientMessagePayloads = {
   [ClientMessageType.GetSpaceInfo]: GetSpaceInfoPayload,
   [ClientMessageType.GetAllSpaces]: GetAllSpacesPayload,
   [ClientMessageType.Error]: ErrorPayload,
+  [ClientMessageType.UserVerficationStatus]: UserVerficationStatusPayload
 };
 
 export function emitClientEvent<T extends ClientMessageType>(
