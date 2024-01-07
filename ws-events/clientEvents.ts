@@ -102,6 +102,11 @@ export function emitClientEvent<T extends ClientMessageType>(
   type: T,
   payload: z.infer<(typeof ClientMessagePayloads)[T]>
 ): void {
+
+  if(!ws) {
+    console.error("Websocket is null");
+  }
+
   // Validate payload using Zod
   const validationResult = ClientMessagePayloads[type].safeParse(payload);
 

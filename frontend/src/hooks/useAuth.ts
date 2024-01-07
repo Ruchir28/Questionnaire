@@ -10,17 +10,23 @@ function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(AuthStatus.Loading);
   const {webSocket,isConnected} = useWebSocket();
 
-  const checkAuthStatus = useCallback(() =>{
+
+
+  const checkAuthStatus = () =>{
     const authToken = parseCookies(document.cookie)["authToken"];
     console.log("Value is",(!!authToken && authToken.length > 0));
     const isAuthenticated = !!authToken && authToken.length > 0;
+    console.log("checkAuthStatus function",isAuthenticated);
     return isAuthenticated;
-    },[]);
+    };
 
   useEffect(() => {
     const tokeanAvailable = checkAuthStatus();
+    console.log("useAuth",tokeanAvailable,webSocket?.ws.readyState);
     if(tokeanAvailable && webSocket && isConnected) {
       setIsAuthenticated(AuthStatus.Authenticated);
+    } else if(webSocket?.ws.readyState === 0) {
+      setIsAuthenticated(AuthStatus.Loading);
     } else {
       setIsAuthenticated(AuthStatus.NotAuthenticated);
     }
@@ -31,7 +37,8 @@ function useAuth() {
         return cookieName !== "authToken";
       }).join(";");
     }
-  }, [checkAuthStatus,webSocket,isConnected]);
+  }, [webSocket,isConnected,webSocket?.ws.readyState]);
+
 
   return isAuthenticated;
 }

@@ -1,0 +1,7 @@
+1. Users not part of space are also able to send questions to space, have a check on it.
+2. first render is not sorted based on upvotes
+3. on reloading the space page, it reauthenticates and in the meantime redirects to the login page, which in turn 
+after authentication redirects to home page. so basically on reloading we are on home page, need to fix this
+4. better segregate the token avalibilty to seprate hook because while first sign in , retry has already reached it's limit and even after user signing in and token being set 
+we aren't initiating a ws connection.
+

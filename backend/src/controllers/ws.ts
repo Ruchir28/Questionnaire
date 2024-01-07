@@ -125,6 +125,7 @@ export function handleWsEvents(ws: CustomWebSocket) {
             });
           });
       } catch (e: any) {
+        console.error(e);
         emitClientEvent(ws, ClientMessageType.Error, {
           message: e.message,
         }); 
@@ -194,7 +195,8 @@ export function handleWsEvents(ws: CustomWebSocket) {
         if (!question) {
           throw new Error("Question not found");
         }
-        space.onGoingQuestionaireRound.upvoteQuestion(question.id);
+        if(space.onGoingQuestionaireRound.upvoteQuestion(question.id, ws.user.id)) {
+
         // ws.send(
         //   JSON.stringify({
         //     message: "Question added",
@@ -211,7 +213,9 @@ export function handleWsEvents(ws: CustomWebSocket) {
               spaceId: space.id,
             });
           });
+        }
       } catch (e: any) {
+        console.log(e);
         emitClientEvent(ws, ClientMessageType.Error, {
           message: e.message,
         });
@@ -281,7 +285,7 @@ export function handleWsEvents(ws: CustomWebSocket) {
             text: q.text,
             questionId: q.id,
             userName: q.user.name,
-            upvotes: q.upvotes,
+            upvotes: q.upvotes.size,
           })),
           spaceId: space.id,
         });
@@ -311,7 +315,7 @@ export function handleWsEvents(ws: CustomWebSocket) {
             text: q.text,
             questionId: q.id,
             userName: q.user.name,
-            upvotes: q.upvotes,
+            upvotes: q.upvotes.size,
           })),
           users: space.users.map((u) => ({
             userName: u.name,

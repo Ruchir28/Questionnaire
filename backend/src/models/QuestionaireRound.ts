@@ -36,12 +36,15 @@ export class QuestionaireRound {
         this.questions = this.questions.filter(q => q.text !== question.text);
     }
 
-    upvoteQuestion(questionId: string) {
+    upvoteQuestion(questionId: string, userId: string) {
+        let check = false;
+        let question = this.questions.find(q => q.id === questionId);
         this.questions.forEach(q => {
             if (q.id === questionId) {
-                q.upvote();
+                check = q.upvote(userId);
             }
         });
+        return check;
     }
 
 }

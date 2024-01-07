@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ClientMessageType, MessageType, emitClientEvent, emitEvent } from "@ruchir28/ws-events"; // Import your message types
+import { ClientMessageType, MessageType, emitEvent } from "@ruchir28/ws-events"; // Import your message types
 import { useWebSocket } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import useAuth from "./useAuth";
@@ -107,7 +107,7 @@ function useSpace(spaceId: string) {
         ClientMessageType.Error,
         (payload, error) => {
           if (payload) {
-            console.error("Error", payload);
+            console.error("Error", payload, error?.stack);
           }
         }
       );

@@ -57,12 +57,12 @@ const authenticateJWT = (req: http.IncomingMessage) => {
 }
 
 server.on('upgrade', (request, socket, head) => {
-  if (!authenticateJWT(request)){
+  const cookies = parseCookies(request);
+  if (!authenticateJWT(request) && userController().getUser(cookies['authToken'] as string) ){
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();
       return;
     }
-    const cookies = parseCookies(request);
     wss.handleUpgrade(request, socket, head, function done(ws: WebSocket,req: http.IncomingMessage) {
       let user_controller = userController();
       let customWebSocket = new CustomWebSocket(ws);
