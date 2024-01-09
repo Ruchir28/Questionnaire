@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ClientMessageType, MessageType, emitEvent } from "@ruchir28/ws-events"; // Import your message types
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocket, WebSocketStatus } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import useAuth from "./useAuth";
 
 function useSpace(spaceId: string) {
-  const { webSocket, isConnected} = useWebSocket();
+  const { webSocket, webSocketStatus} = useWebSocket();
   const isAuthenticated = useAuth();
 
   // Example state variables
@@ -21,7 +21,7 @@ function useSpace(spaceId: string) {
 
   useEffect(() => {
     console.log("In here 1")
-    if (isAuthenticated && isConnected &&  webSocket && clientHandler) {
+    if (isAuthenticated && webSocketStatus === WebSocketStatus.Connected &&  webSocket && clientHandler) {
       console.log("In here 2")
       // Register handlers for different message types
       const unregisterNewQuestion = clientHandler.registerHandler(
@@ -128,7 +128,7 @@ function useSpace(spaceId: string) {
         unregisterGetSpaceInfo();
       };
     }
-  }, [spaceId, isAuthenticated, webSocket, clientHandler,isConnected]);
+  }, [spaceId, isAuthenticated, webSocket, clientHandler,webSocketStatus]);
 
   return {
     questions,

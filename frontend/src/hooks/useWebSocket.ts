@@ -3,53 +3,73 @@ import { FrontEndWebSocket } from "../utils/FrontendWebSocket";
 import { WEBSOCKET_URL } from "../constant";
 let webSocket: FrontEndWebSocket | null = null;
 
+export enum WebSocketStatus {
+  Uninitialized = "Uninitialized",
+  Connecting = "Connecting",
+  Connected = "Connected",
+  Disconnected = "Disconnected",
+};
+
 export const useWebSocket = () => {
-  const [isConnected, setConnected] = useState(webSocket?.ws.readyState === 1 ? true : false);
   const retryCount = useRef(0);
-  console.log("isConnected", webSocket?.ws, isConnected);
+  const [webSocketStatus,setWebSocketStatus] = useState<WebSocketStatus>(() => {
+    if(!webSocket) {
+      return WebSocketStatus.Uninitialized;
+    } else if(webSocket.ws.readyState === 1) {
+      return WebSocketStatus.Connected;
+    } else if(webSocket.ws.readyState === 0) {
+      return WebSocketStatus.Connecting;
+    }
+    return WebSocketStatus.Disconnected;
+  });
   const initWebSocket = useCallback(() => {
-      console.log("initWebSocket", webSocket?.ws, isConnected);
-    if ((!webSocket || webSocket.ws.readyState === 3) && retryCount.current < 5) {
+    console.log("initWebSocket", webSocket?.ws, webSocketStatus, retryCount.current);
+    if ((!webSocket || webSocketStatus === WebSocketStatus.Disconnected) && retryCount.current < 5) {
       console.log("called initWebSocket");
       webSocket = new FrontEndWebSocket(WEBSOCKET_URL);
       webSocket.ws.addEventListener("open", () => {
         retryCount.current = 0;
         console.log(`WebSocket connection established with ${WEBSOCKET_URL}`);
-        setConnected(true);
+        setWebSocketStatus(WebSocketStatus.Connected);
       });
       webSocket.ws.addEventListener("error", () => {
         console.log(`WebSocket connection failed with ${WEBSOCKET_URL}`);
-        webSocket = null;
-        setConnected(false)
+        webSocket?.ws.close();
+        setWebSocketStatus(WebSocketStatus.Disconnected);
       });
       webSocket.ws.addEventListener("close", () => {
         console.log(`WebSocket connection closed with ${WEBSOCKET_URL}`);
-        webSocket = null;
-        setConnected(false)
+        webSocket?.ws.close();
+        setWebSocketStatus(WebSocketStatus.Disconnected);
       });
     }
     retryCount.current += 1;
-  }, [isConnected]);
+  },[webSocketStatus]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if(webSocket?.ws.readyState === 1 && isConnected === false) {
-        setConnected(true);
+      if(!webSocket) {
+        setWebSocketStatus(WebSocketStatus.Uninitialized);
+        initWebSocket();
+      }
+      else if(webSocket.ws.readyState === 1) {
+        setWebSocketStatus(WebSocketStatus.Connected);
         retryCount.current = 0;
-      } else if(!isConnected) {
-        console.log("Not connected", webSocket?.ws.readyState, isConnected);
-        console.log("Trying to connect again ...");
+      } else if(webSocket?.ws.readyState === 0) {
+        setWebSocketStatus(WebSocketStatus.Connecting);
+      } else if(webSocket?.ws.readyState === 3) {
+        setWebSocketStatus(WebSocketStatus.Disconnected);
         initWebSocket();
       }
     }, 1000);
     return () => {
       clearInterval(intervalId);
     }
-  }, [isConnected, initWebSocket]);
+  }, [initWebSocket]);
 
   useEffect(() => {
     initWebSocket();
   }, [initWebSocket]);
 
-  return { webSocket, isConnected };
+  return { webSocket, webSocketStatus: webSocketStatus };
 };

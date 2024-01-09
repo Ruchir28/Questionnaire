@@ -58,7 +58,7 @@ const authenticateJWT = (req: http.IncomingMessage) => {
 
 server.on('upgrade', (request, socket, head) => {
   const cookies = parseCookies(request);
-  if (!authenticateJWT(request) && userController().getUser(cookies['authToken'] as string) ){
+  if (!authenticateJWT(request) || (!userController().getUser(cookies['authToken'] as string))){
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();
       return;

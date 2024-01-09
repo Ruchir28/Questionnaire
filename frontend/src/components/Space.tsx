@@ -10,7 +10,7 @@ interface SpaceProps {}
 const Space: React.FC<SpaceProps> = () => {
   const { spaceId } = useParams();
   const space = useSpace(spaceId!);
-  const { webSocket, isConnected } = useWebSocket();
+  const { webSocket, webSocketStatus } = useWebSocket();
   const [question, setQuestion] = React.useState<string>("");
   return (
     <div> 

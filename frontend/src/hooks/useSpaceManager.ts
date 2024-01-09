@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import useAuth, { AuthStatus } from "./useAuth";
-import { useWebSocket } from "./useWebSocket";
+import { WebSocketStatus, useWebSocket } from "./useWebSocket";
  import { ClientMessageType, emitEvent, MessageType } from "@ruchir28/ws-events";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 const useSpaceManager = () => {
     const authStatus = useAuth();
-    const { isConnected,webSocket } = useWebSocket();
+    const { webSocketStatus,webSocket } = useWebSocket();
 
     useEffect(() => {
-        console.log("updated in space manager",isConnected);
-    },[isConnected]);
+        console.log("updated in space manager",webSocketStatus);
+    },[webSocketStatus]);
 
     const clientHandler = useMemo(() => {
         return webSocket ? createClientHandlerManager(webSocket) : null;
@@ -18,7 +18,7 @@ const useSpaceManager = () => {
     const [spaces,setSpaces] = useState<string[]>([]);
 
     useEffect(() => {
-        if(isConnected && webSocket && authStatus === AuthStatus.Authenticated && clientHandler) {
+        if(webSocketStatus === WebSocketStatus.Connected && webSocket && authStatus === AuthStatus.Authenticated && clientHandler) {
         
             console.log("Registering Space Created Handler");
 
@@ -45,7 +45,7 @@ const useSpaceManager = () => {
                 unregisterGetSpacesInfo();
             }
         }
-    },[webSocket,clientHandler,authStatus,isConnected]);
+    },[webSocket,clientHandler,authStatus,webSocketStatus]);
 
     return {
         spaces

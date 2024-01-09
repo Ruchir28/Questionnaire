@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useWebSocket } from "./useWebSocket";
+import { useWebSocket, WebSocketStatus } from "./useWebSocket";;
 export enum AuthStatus {
   Loading = 'Loading',
   Authenticated = 'Authenticated',
@@ -8,7 +8,7 @@ export enum AuthStatus {
 
 function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(AuthStatus.Loading);
-  const {webSocket,isConnected} = useWebSocket();
+  const {webSocket,webSocketStatus} = useWebSocket();
 
 
 
@@ -23,9 +23,9 @@ function useAuth() {
   useEffect(() => {
     const tokeanAvailable = checkAuthStatus();
     console.log("useAuth",tokeanAvailable,webSocket?.ws.readyState);
-    if(tokeanAvailable && webSocket && isConnected) {
+    if(tokeanAvailable && webSocket && webSocketStatus === WebSocketStatus.Connected) {
       setIsAuthenticated(AuthStatus.Authenticated);
-    } else if(webSocket?.ws.readyState === 0) {
+    } else if(webSocketStatus === WebSocketStatus.Connecting || webSocketStatus === WebSocketStatus.Uninitialized) {
       setIsAuthenticated(AuthStatus.Loading);
     } else {
       setIsAuthenticated(AuthStatus.NotAuthenticated);
@@ -37,7 +37,7 @@ function useAuth() {
         return cookieName !== "authToken";
       }).join(";");
     }
-  }, [webSocket,isConnected,webSocket?.ws.readyState]);
+  }, [webSocket,webSocketStatus,webSocket?.ws.readyState]);
 
 
   return isAuthenticated;
