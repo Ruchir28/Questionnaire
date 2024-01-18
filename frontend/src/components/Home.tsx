@@ -4,9 +4,7 @@ import withAuth from '../hoc/withAuth';
 import {emitEvent,MessageType} from '@ruchir28/ws-events'
 import useSpaceManager from '../hooks/useSpaceManager';
 import { Link } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { toast } from 'react-toastify';
 
 // Define the type of the props object that will be passed to the component
 
@@ -49,7 +47,6 @@ const Home = () => {
                     emitEvent(webSocket!,MessageType.JoinSpace,{spaceId: joinSpace});
                 }}>Join</button>
             </div>
-            <ToastContainer />
         </div>
     );
 };

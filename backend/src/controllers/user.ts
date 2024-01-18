@@ -17,6 +17,7 @@ export function userController() {
       // removing user from mapping when connection is closed
       // TODO: check if it's causing some problems 
       ws.ws.on("close", () => {
+        console.log("User connectionn mapping removed");
         delete userConnectionMapping[userId];
       });
     },

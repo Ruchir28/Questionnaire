@@ -85,11 +85,12 @@ function useSpace(spaceId: string) {
       const unregisterGetQuestionsForSpace = clientHandler.registerHandler(
         ClientMessageType.GetQuestionsForSpace,
         (payload, error) => {
-          console.log("Get Questions for space", payload);
+          console.log("Get Questions for space -->", payload);
           if (payload) {
-            setQuestions((prevQuestions) => {
-              return [...payload.questions.map((question) => new Question(question.questionId, question.text, question.upvotes))];
+            const sortedQuestions = payload.questions.sort((a,b)=>b.upvotes - a.upvotes).map((question) => {
+              return new Question(question.questionId,question.text,question.upvotes);
             });
+            setQuestions([...sortedQuestions]);
           }
         }
       );
@@ -98,7 +99,10 @@ function useSpace(spaceId: string) {
         if(payload) {
           console.log("Get Space Info",payload);
           setUsers(() => [...payload.users.map((user) => user.userName)]);
-          setQuestions(() => [...payload.questions.map((question) => new Question(question.questionId, question.text, question.upvotes))]);
+          const sortedQuestions = payload.questions.sort((a,b)=>b.upvotes - a.upvotes).map((question) => {
+            return new Question(question.questionId,question.text,question.upvotes);
+          });
+          setQuestions(() => [...sortedQuestions]);
           setCurrentRound(payload.currentRound);
         }
       });

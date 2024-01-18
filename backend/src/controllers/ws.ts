@@ -148,15 +148,11 @@ export function handleWsEvents(ws: CustomWebSocket) {
       if (!space.onGoingQuestionaireRound) {
         throw new Error("No Round in progress");
       }
+      if(space.users.findIndex(user => user.id === ws.user?.id) !== -1) {
+        throw new Error("Only users in space can post questions");
+      } 
       let question = new Question(payload.text, ws.user);
       space.onGoingQuestionaireRound.addQuestion(question);
-      //   ws.send(
-      //     JSON.stringify({
-      //       message: "Question added",
-      //       spaceId: space.id,
-      //       questionId: question.id,
-      //     })
-      //   );
       space_controller.getUsersWithConnectionInSpace(space.id).map((userWs) => {
         emitClientEvent(userWs, ClientMessageType.NewQuestion, {
           text: question.text,
