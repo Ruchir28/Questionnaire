@@ -31,6 +31,6 @@ jobs:
           cd ..
           npm run build:frontend
           npm run build:backend
-          sudo mv Questionnaire/frontend/build /var/www/Questionnaire
+          sudo mv frontend/build /var/www/Questionnaire
           cd backend
           pm2 reload dist/index.js
