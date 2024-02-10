@@ -32,4 +32,4 @@ jobs:
           npm run build:frontend
           npm run build:backend
           cd backend
-          pm2 start dist/index.js
+          pm2 reload dist/index.js
