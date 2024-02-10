@@ -20,6 +20,7 @@ jobs:
           git pull origin main
           npm install
           cd ws-events
+          npm install
           npm run build
           npm link
           cd ..
