@@ -19,6 +19,11 @@ jobs:
           cd workplace/Questionnaire
           git pull origin main
           npm install
+          cd frontend
+          npm link @ruchir28/ws-events
+          cd ../backend
+          npm link @ruchir28/ws-events
+          cd ..
           npm run build:frontend
           npm run build:backend
           cd backend
