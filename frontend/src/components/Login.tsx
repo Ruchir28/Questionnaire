@@ -2,16 +2,15 @@ import React from "react";
 import { useState } from "react";
 import { BACKEND_URL } from "../constant";
 import Cookies from "js-cookie";
-import {Navigate} from 'react-router-dom'
+import { Navigate } from "react-router-dom";
 import useAuth, { AuthStatus } from "../hooks/useAuth";
 
 function Login() {
   const [name, setName] = useState("");
   const isAuthenticated = useAuth();
-  console.log("State is",isAuthenticated);
+  console.log("State is", isAuthenticated);
 
   async function onSubmit(e: any) {
-    e.preventDefault();
     console.log(name);
     fetch(`${BACKEND_URL}/login`, {
       method: "POST",
@@ -30,27 +29,36 @@ function Login() {
       });
   }
 
-  if(isAuthenticated === AuthStatus.Authenticated) {
-    return <Navigate to="/"></Navigate>
+  if (isAuthenticated === AuthStatus.Authenticated) {
+    return <Navigate to="/"></Navigate>;
   }
 
   return (
     <div>
-      <h1>Login</h1>
-      <form>
-        <label>
-          UserName:
-          <input
-            type="text"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </label>
-        <button type="submit" value="Submit" onClick={(e) => onSubmit(e)}>
-          LOGIN
+      <div className="ms-5">
+        <h1 className="text-primary">Login</h1>
+      </div>
+      <div className="d-flex my-3 ms-5">
+        <input
+          type="text"
+          className="form-control w-50 m-2 my-auto"
+          placeholder="Enter User Name"
+          aria-label="Recipient's username"
+          aria-describedby="button-addon2"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button
+          className="btn btn-outline-secondary me-auto my-auto"
+          type="button"
+          id="button-addon2"
+          onClick={() => {
+            onSubmit(name);
+          }}
+        >
+          Login
         </button>
-      </form>
+      </div>
     </div>
   );
 }
