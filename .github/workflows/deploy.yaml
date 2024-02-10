@@ -1,0 +1,25 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main  # or any branch you want to deploy from
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to remove server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd workplace/Questionnaire
+          git pull origin main
+          npm install
+          npm run build:frontend
+          npm run build:backend
+          cd backend
+          pm2 start dist/index.js
