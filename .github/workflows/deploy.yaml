@@ -29,6 +29,8 @@ jobs:
           cd ../backend
           npm link @ruchir28/ws-events
           cd ..
+          export REACT_APP_BACKEND_URL=${{ secrets.REACT_APP_BACKEND_URL }}
+          export REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}
           npm run build:frontend
           npm run build:backend
           sudo mv frontend/build /var/www/Questionnaire
