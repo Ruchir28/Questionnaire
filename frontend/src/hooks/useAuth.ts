@@ -31,21 +31,13 @@ function useAuth() {
       setIsAuthenticated(AuthStatus.NotAuthenticated);
     }
     return () => {
-      document.cookie = document.cookie.split(";").filter((c) => {
-        let cookie = c.split("=");
-        let cookieName = cookie[0].trim();
-        return cookieName !== "authToken";
-      }).join(";");
     }
   }, [webSocket,webSocketStatus,webSocket?.ws.readyState]);
 
   const logout = () => {
-    document.cookie = document.cookie.split(";").filter((c) => {
-      let cookie = c.split("=");
-      let cookieName = cookie[0].trim();
-      return cookieName !== "authToken";
-    }).join(";");
+    document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     setIsAuthenticated(AuthStatus.NotAuthenticated);
+    webSocket?.ws.close();
   };
 
 

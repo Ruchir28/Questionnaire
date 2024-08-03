@@ -7,6 +7,7 @@ export class FrontEndWebSocket implements IWebSocket {
     send(data: string) {
         if(this.ws.readyState !== this.ws.OPEN) {
             console.error('WebSocket is not open');
+            return;
         }
         this.ws.send(data);
     };
