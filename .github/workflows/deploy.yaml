@@ -22,12 +22,12 @@ jobs:
           cd ws-events
           npm install
           npm run build
-          sudo npm link
+          npm link
           cd ..
           cd frontend
-          sudo npm link @ruchir28/ws-events
+          npm link @ruchir28/ws-events
           cd ../backend
-          sudo npm link @ruchir28/ws-events
+          npm link @ruchir28/ws-events
           cd ..
           export REACT_APP_BACKEND_URL=${{ secrets.REACT_APP_BACKEND_URL }}
           export REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}
