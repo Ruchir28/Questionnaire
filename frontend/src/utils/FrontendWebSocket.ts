@@ -1,4 +1,4 @@
-import { IWebSocket } from "@ruchir28/ws-events/IWebSocket";
+import { IWebSocket } from "@ruchir28/ws-events";
 export class FrontEndWebSocket implements IWebSocket {
     ws: WebSocket;
     constructor(url: string) {

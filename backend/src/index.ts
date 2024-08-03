@@ -2,7 +2,7 @@ import express from 'express';
 import {Server as WebSocketServer} from 'ws';
 import http from 'http';
 import { v4 as uuidv4 } from 'uuid';
-import {createHandlerManager,emitEvent} from "@ruchir28/ws-events/serverEvents"
+import {createHandlerManager,emitEvent} from "@ruchir28/ws-events"
 import { handleWsEvents } from './controllers/ws';
 import { CustomWebSocket } from './types/CustomWebSocket';
 import { logIn, userController } from './controllers/user';

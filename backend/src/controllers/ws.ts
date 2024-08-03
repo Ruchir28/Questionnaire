@@ -6,7 +6,7 @@ import {
 import {
   emitClientEvent,
   ClientMessageType,
-} from "@ruchir28/ws-events/clientEvents";
+} from "@ruchir28/ws-events";
 import { spaceController } from "./space";
 import { CustomWebSocket } from "../types/CustomWebSocket";
 import { Question } from "../models/Question";

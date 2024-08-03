@@ -1,6 +1,6 @@
 import { User } from "../models/User";
 import {WebSocket} from 'ws';
-import {IWebSocket} from '@ruchir28/ws-events/IWebSocket'
+import {IWebSocket} from '@ruchir28/ws-events'
 
 export class CustomWebSocket implements IWebSocket{
     ws: WebSocket;
