@@ -36,7 +36,7 @@ function parseCookies(request: http.IncomingMessage): { [key: string]: string } 
 // Initialize a basic HTTP server using Express
 const server = http.createServer(app);
 
-app.post('/login', logIn);
+app.post('/api/login', logIn);
 
 // Initialize a WebSocket server instance
 const wss = new WebSocketServer({ path: '/ws', noServer: true});
