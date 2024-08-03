@@ -33,6 +33,6 @@ jobs:
           export REACT_APP_WS_URL=${{ secrets.REACT_APP_WS_URL }}
           npm run build:frontend
           npm run build:backend
-          sudo mv frontend/build/* /var/www/Questionnaire/
+          sudo rsync -av --delete frontend/build/ /var/www/Questionnaire/
           cd backend
           pm2 reload dist/index.js
