@@ -24,7 +24,7 @@ export const useWebSocket = () => {
   });
   const initWebSocket = useCallback(() => {
     console.log("initWebSocket", webSocket?.ws, webSocketStatus, retryCount.current);
-    if ((!webSocket || webSocketStatus === WebSocketStatus.Disconnected) && retryCount.current < 5) {
+    if ((!webSocket || webSocketStatus === WebSocketStatus.Disconnected)) {
       console.log("called initWebSocket");
       webSocket = new FrontEndWebSocket(WEBSOCKET_URL);
       webSocket.ws.addEventListener("open", () => {
@@ -43,7 +43,6 @@ export const useWebSocket = () => {
         setWebSocketStatus(WebSocketStatus.Disconnected);
       });
     }
-    retryCount.current += 1;
   },[webSocketStatus]);
 
   useEffect(() => {

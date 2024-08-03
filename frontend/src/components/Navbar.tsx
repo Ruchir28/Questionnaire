@@ -1,13 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import { WebSocketStatus, useWebSocket } from "../hooks/useWebSocket";
+import useAuth from "../hooks/useAuth";
 
 function Navbar() {
 
     const { webSocketStatus } = useWebSocket();
+    const navigate = useNavigate();
+    const {logout} = useAuth();
 
     return (
         <nav className="navbar bg-body-tertiary">
         <div className="container-fluid">
-          <div>
+          <div onClick={() => {
+            navigate("/");
+          }}>
             <h1 className="navbar-brand">Questionairre</h1>
           </div>
           <div className="d-flex justify-content-end">
@@ -29,6 +35,7 @@ function Navbar() {
                 className="btn btn-outline-danger"
                 onClick={() => {
                   console.log("Logging out");
+                  logout();
                 }}
               >
                 Logout

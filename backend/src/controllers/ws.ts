@@ -2,7 +2,7 @@ import {
   createHandlerManager,
   emitEvent,
   MessageType,
-} from "@ruchir28/ws-events/serverEvents";
+} from "@ruchir28/ws-events";
 import {
   emitClientEvent,
   ClientMessageType,
@@ -246,12 +246,9 @@ export function handleWsEvents(ws: CustomWebSocket) {
           throw new Error("Only host can end the round");
         }
         space.removeQuestionaireRound();
-        ws.send(
-          JSON.stringify({
-            message: "Ended the Round",
-            spaceId: space.id,
-          })
-        );
+        emitClientEvent(ws, ClientMessageType.RoundEnded, {
+          spaceId: space.id,
+        });
       } catch (e: any) {
         emitClientEvent(ws, ClientMessageType.Error, {
           message: e.message,

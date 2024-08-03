@@ -6,7 +6,7 @@ const withAuth = <P extends object>(
   WrappedComponent: React.ComponentType<P>
 ):  React.FC<P> => {
   return (props: P) => {
-    const isAuthenticated = useAuth(); 
+    const {isAuthenticated} = useAuth(); 
     const navigate = useNavigate();
     useEffect(()=>{
       console.log("State is",isAuthenticated);

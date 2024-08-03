@@ -5,7 +5,7 @@ import { WebSocketStatus, useWebSocket } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import { toast } from "react-toastify";
 const useSpaceManager = () => {
-    const authStatus = useAuth();
+    const {isAuthenticated: authStatus} = useAuth();
     const { webSocketStatus,webSocket } = useWebSocket();
 
     useEffect(() => {

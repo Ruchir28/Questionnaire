@@ -5,15 +5,28 @@ import { useWebSocket } from "../hooks/useWebSocket";
 import { MessageType, emitEvent } from "@ruchir28/ws-events";
 import withAuth from "../hoc/withAuth";
 import Question from "./Question";
+import {useNavigate} from "react-router-dom"
 
 interface SpaceProps {}
 
 const Space: React.FC<SpaceProps> = () => {
   const { spaceId } = useParams();
-  const space = useSpace(spaceId!);
+  const { currentRound, questions, users, roundEnded } = useSpace(spaceId!);
   const { webSocket, webSocketStatus } = useWebSocket();
   const [viewUsers, setViewUsers] = React.useState<boolean>(false);
   const [question, setQuestion] = React.useState<string>("");
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    
+    if(roundEnded) {
+      // redirect to home
+      navigate("/");
+    }
+  }, [roundEnded]);
+
+
   return (
     <div className="container">
       <div className="bg-light text-center mt-3">
@@ -27,13 +40,11 @@ const Space: React.FC<SpaceProps> = () => {
           }}
         >
           Users:{" "}
-          <span className="badge bg-primary rounded-pill">
-            {space?.users.length}
-          </span>
+          <span className="badge bg-primary rounded-pill">{users.length}</span>
         </button>
         {viewUsers && (
           <div className="list-group m-2">
-            {space?.users.map((user) => {
+            {users.map((user) => {
               return (
                 <p className="p-1 m-1" key={user}>
                   {user}
@@ -44,9 +55,9 @@ const Space: React.FC<SpaceProps> = () => {
         )}
       </div>
       <div className="list-group">
-        {space?.questions.map((question) => {
+        {questions.map((question) => {
           return (
-            <div className="list-group-item ">
+            <div className="list-group-item " key={question.id}>
               <Question
                 questionText={question.text}
                 id={question.id}
@@ -64,23 +75,39 @@ const Space: React.FC<SpaceProps> = () => {
         })}
       </div>
       <div className="my-3">
-        <div className="row">
+        {!roundEnded && (        <div className="row">
           <div className="col-5 m-auto text-center border-0">
-            <h5>Active Quetionairre : {space.currentRound ? "true" : "false"}</h5>
+            <h5>Active Quetionairre : {currentRound ? "true" : "false"}</h5>
           </div>
-          <div className="col-5 text-center m-auto">
-            <button
-              className="btn btn-primary m-2 w-100"
-              onClick={() => {
-                emitEvent(webSocket!, MessageType.CreateQuestionaireRound, {
-                  spaceId: spaceId!,
-                });
-              }}
-            >
-              Start Round
-            </button>
-          </div>
+          {!currentRound ? (
+            <div className="col-5 text-center m-auto">
+              <button
+                className="btn btn-primary m-2 w-100"
+                onClick={() => {
+                  emitEvent(webSocket!, MessageType.CreateQuestionaireRound, {
+                    spaceId: spaceId!,
+                  });
+                }}
+              >
+                Start Round
+              </button>
+            </div>
+          ) : (
+            <div className="col-5 text-center m-auto">
+              <button
+                className="btn btn-primary m-2 w-100"
+                onClick={() => {
+                  emitEvent(webSocket!, MessageType.EndCurrentRound, {
+                    spaceId: spaceId!,
+                  });
+                }}
+              >
+                End Round
+              </button>
+            </div>
+          )}
         </div>
+)}
       </div>
       <div>
         <div className="input-group mb-3">
@@ -93,6 +120,7 @@ const Space: React.FC<SpaceProps> = () => {
             aria-label="Sizing example input"
             aria-describedby="inputGroup-sizing-default"
             onChange={(e) => setQuestion(e.target.value)}
+            value={question}
           />
         </div>
         <button
@@ -102,6 +130,7 @@ const Space: React.FC<SpaceProps> = () => {
               spaceId: spaceId!,
               text: question,
             });
+            setQuestion("");
           }}
         >
           Submit

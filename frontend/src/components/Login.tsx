@@ -7,7 +7,7 @@ import useAuth, { AuthStatus } from "../hooks/useAuth";
 
 function Login() {
   const [name, setName] = useState("");
-  const isAuthenticated = useAuth();
+  const {isAuthenticated} = useAuth();
   console.log("State is", isAuthenticated);
 
   async function onSubmit(e: any) {

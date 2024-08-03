@@ -3,15 +3,17 @@ import { ClientMessageType, MessageType, emitEvent } from "@ruchir28/ws-events";
 import { useWebSocket, WebSocketStatus } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import useAuth from "./useAuth";
+import { toast } from "react-toastify";
 
 function useSpace(spaceId: string) {
   const { webSocket, webSocketStatus} = useWebSocket();
-  const isAuthenticated = useAuth();
+  const {isAuthenticated} = useAuth();
 
   // Example state variables
   const [questions, setQuestions] = useState<Question[]>([]);
   const [users, setUsers] = useState<string[]>([]);
   const [currentRound, setCurrentRound] = useState<boolean>(false);
+  const [roundEnded, setRoundEnded] = useState<boolean>(false);
 
   
   const clientHandler = useMemo(() => {
@@ -32,6 +34,9 @@ function useSpace(spaceId: string) {
               ...prevQuestions,
               new Question(payload.questionId, payload.text, 0),
             ]);
+          } else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
         }
       );
@@ -42,6 +47,9 @@ function useSpace(spaceId: string) {
           if (payload) {
             console.log("User Joined", payload);
             setUsers((prevUsers) => [...prevUsers, payload.userId]);
+          } else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
         }
       );
@@ -51,8 +59,11 @@ function useSpace(spaceId: string) {
         (payload, error) => {
           if (payload?.spaceId === spaceId) {
             setCurrentRound(true);
+          }  else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
-        }
+        } 
       );
 
       const unregisterRoundEnded = clientHandler.registerHandler(
@@ -60,6 +71,10 @@ function useSpace(spaceId: string) {
         (payload, error) => {
           if (payload?.spaceId === spaceId) {
             setCurrentRound(false);
+            setRoundEnded(true);
+          }  else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
         }
       );
@@ -91,6 +106,9 @@ function useSpace(spaceId: string) {
               return new Question(question.questionId,question.text,question.upvotes);
             });
             setQuestions([...sortedQuestions]);
+          }  else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
         }
       );
@@ -104,6 +122,9 @@ function useSpace(spaceId: string) {
           });
           setQuestions(() => [...sortedQuestions]);
           setCurrentRound(payload.currentRound);
+        }  else {
+          const errorMsg = error?.message ?? "Something Went Wrong";
+          if(errorMsg) toast.error(errorMsg)
         }
       });
 
@@ -112,6 +133,12 @@ function useSpace(spaceId: string) {
         (payload, error) => {
           if (payload) {
             console.error("Error", payload, error?.stack);
+            const errorMsg = payload?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
+
+          }  else {
+            const errorMsg = error?.message ?? "Something Went Wrong";
+            if(errorMsg) toast.error(errorMsg)
           }
         }
       );
@@ -130,6 +157,7 @@ function useSpace(spaceId: string) {
         unregisterGetQuestionsForSpace();
         unregisterError();
         unregisterGetSpaceInfo();
+        unregisterRoundEnded();
       };
     }
   }, [spaceId, isAuthenticated, webSocket, clientHandler,webSocketStatus]);
@@ -137,7 +165,8 @@ function useSpace(spaceId: string) {
   return {
     questions,
     users,
-    currentRound
+    currentRound,
+    roundEnded,
   };
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useWebSocket, WebSocketStatus } from "./useWebSocket";;
 export enum AuthStatus {
   Loading = 'Loading',
@@ -39,8 +39,17 @@ function useAuth() {
     }
   }, [webSocket,webSocketStatus,webSocket?.ws.readyState]);
 
+  const logout = () => {
+    document.cookie = document.cookie.split(";").filter((c) => {
+      let cookie = c.split("=");
+      let cookieName = cookie[0].trim();
+      return cookieName !== "authToken";
+    }).join(";");
+    setIsAuthenticated(AuthStatus.NotAuthenticated);
+  };
 
-  return isAuthenticated;
+
+  return {isAuthenticated,logout};
 }
 
 
