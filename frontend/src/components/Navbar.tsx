@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { WebSocketStatus, useWebSocket } from "../hooks/useWebSocket";
-import useAuth from "../hooks/useAuth";
+import useStore, {WebSocketStatus} from "../hooks/useStore";
 
 function Navbar() {
 
-    const { webSocketStatus } = useWebSocket();
+    const { webSocketStatus } = useStore();
     const navigate = useNavigate();
-    const {logout} = useAuth();
+    const {logout} = useStore();
 
     return (
         <nav className="navbar bg-body-tertiary">

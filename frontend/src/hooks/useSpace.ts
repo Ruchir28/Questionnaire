@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ClientMessageType, MessageType, emitEvent } from "@ruchir28/ws-events"; // Import your message types
-import { useWebSocket, WebSocketStatus } from "./useWebSocket";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
-import useAuth from "./useAuth";
 import { toast } from "react-toastify";
+import useStore, {WebSocketStatus} from "./useStore";
 
 function useSpace(spaceId: string) {
-  const { webSocket, webSocketStatus} = useWebSocket();
-  const {isAuthenticated} = useAuth();
+  const { webSocket, webSocketStatus, isAuthenticated} = useStore();
 
   // Example state variables
   const [questions, setQuestions] = useState<Question[]>([]);

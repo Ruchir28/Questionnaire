@@ -1,16 +1,16 @@
 import React from "react";
-import { useWebSocket, WebSocketStatus } from "../hooks/useWebSocket";
 import withAuth from "../hoc/withAuth";
 import { emitEvent, MessageType } from "@ruchir28/ws-events";
 import useSpaceManager from "../hooks/useSpaceManager";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import useStore, {WebSocketStatus} from "../hooks/useStore";
 
 // Define the type of the props object that will be passed to the component
 
 // Define the component as a function that takes in the props object and returns a JSX element
 const Home = () => {
-  const { webSocket, webSocketStatus } = useWebSocket();
+  const { webSocket, webSocketStatus } = useStore();
   const [spaceName, setSpaceName] = React.useState<string>("");
   const [joinSpace, setJoinSpace] = React.useState<string>("");
   const { spaces } = useSpaceManager();

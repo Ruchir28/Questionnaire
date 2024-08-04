@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSpace from "../hooks/useSpace";
-import { useWebSocket } from "../hooks/useWebSocket";
 import { MessageType, emitEvent } from "@ruchir28/ws-events";
 import withAuth from "../hoc/withAuth";
 import Question from "./Question";
 import {useNavigate} from "react-router-dom"
+import useStore from "../hooks/useStore";
 
 interface SpaceProps {}
 
 const Space: React.FC<SpaceProps> = () => {
   const { spaceId } = useParams();
   const { currentRound, questions, users, roundEnded } = useSpace(spaceId!);
-  const { webSocket, webSocketStatus } = useWebSocket();
+  const { webSocket, webSocketStatus } = useStore();
   const [viewUsers, setViewUsers] = React.useState<boolean>(false);
   const [question, setQuestion] = React.useState<string>("");
   const navigate = useNavigate();

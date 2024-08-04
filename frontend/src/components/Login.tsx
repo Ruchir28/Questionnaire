@@ -1,13 +1,12 @@
 import React from "react";
 import { useState } from "react";
 import { BACKEND_URL } from "../constant";
-import Cookies from "js-cookie";
 import { Navigate } from "react-router-dom";
-import useAuth, { AuthStatus } from "../hooks/useAuth";
+import useStore, {AuthStatus} from "../hooks/useStore";
 
 function Login() {
   const [name, setName] = useState("");
-  const {isAuthenticated} = useAuth();
+  const {isAuthenticated,login} = useStore();
   console.log("State is", isAuthenticated);
 
   async function onSubmit(e: any) {
@@ -22,7 +21,8 @@ function Login() {
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        Cookies.set("authToken", encodeURI(data.userId));
+        // Cookies.set("authToken", encodeURI(data.userId));
+        login(encodeURI(data.userId))
       })
       .catch((err) => {
         console.log("Login Failed");

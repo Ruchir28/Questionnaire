@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import useAuth, { AuthStatus } from "./useAuth";
-import { WebSocketStatus, useWebSocket } from "./useWebSocket";
  import { ClientMessageType, emitEvent, MessageType } from "@ruchir28/ws-events";
 import { createClientHandlerManager } from "@ruchir28/ws-events";
 import { toast } from "react-toastify";
+import useStore, {WebSocketStatus, AuthStatus} from "./useStore";
 const useSpaceManager = () => {
-    const {isAuthenticated: authStatus} = useAuth();
-    const { webSocketStatus,webSocket } = useWebSocket();
+    const {isAuthenticated: authStatus, webSocketStatus,webSocket} = useStore();
 
     useEffect(() => {
         console.log("updated in space manager",webSocketStatus);
