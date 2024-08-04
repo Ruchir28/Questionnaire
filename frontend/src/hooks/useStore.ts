@@ -73,5 +73,33 @@ const useStore = createWithEqualityFn<State>((set, get) => ({
   },
 }));
 
+const parseCookies = (cookies: string) => {
+  const list: { [key: string]: string } = {};
+  cookies &&
+    cookies.split(";").forEach((cookie) => {
+      const parts = cookie.split("=");
+      const key = parts.shift()?.trim();
+      const value = decodeURI(parts.join("=")?.trim());
+      if (key && value) {
+        list[key] = value;
+      }
+    });
+  return list;
+};
+// Initialize authentication state based on cookie
+const initAuthState = () => {
+  const token = parseCookies(document.cookie)["authToken"];
+  const store = useStore.getState();
+  if (token) {
+    store.login(token);
+  } else {
+    store.logout();
+  }
+};
+
+// Call the function to initialize the auth state when the store is created
+initAuthState();
+
+
 export default useStore;
 
